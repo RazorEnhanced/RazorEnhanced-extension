@@ -1,7 +1,7 @@
 # Makefile for RazorEnhanced-extension
 
 # Variables
-EXTENSION_NAME := RazorEnhanced-extension
+EXTENSION_NAME := razorenhanced-extension
 VERSION := 0.0.1
 VSIX_FILE := $(EXTENSION_NAME)-$(VERSION).vsix
 
@@ -46,5 +46,5 @@ open:
 protobuf:
 	protoc -I ./proto --python_out=./test/ open_file.proto
 
-test: install-extension
+test: protobuf install-extension
 	python3 test/test.py
