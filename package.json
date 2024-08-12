@@ -1,0 +1,46 @@
+{
+    "name": "razorenhanced-extension",
+    "displayName": "RazorEnhanced Extension",
+    "version": "0.0.1",
+    "description": "A VSCodium extension for RazorEnhanced",
+    "repository": {
+	"type": "git",
+	"url": "https://github.com/RazorEnhanced/RazorEnhanced-extension.git"
+    },
+    "author": "RazorEnhanced Team",
+    "license": "GPL-3",  
+    "keywords": ["razorenhanced", "vscodium", "extension"],
+    "categories": ["Other"],
+    "bugs": {
+	"url": "https://github.com/RazorEnhanced/RazorEnhanced-extension/issues"
+    },
+    "homepage": "https://github.com/RazorEnhanced/RazorEnhanced-extension#readme",
+    "engines": {
+	"vscode": "^1.60.0"
+    },
+    "activationEvents": [
+	"onCommand:razorenhanced.startReceiver"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+	"commands": [
+	    {
+		"command": "razorenhanced.startReceiver",
+		"title": "Start RazorEnhanced Protobuf Receiver"
+	    }
+	]
+    },
+    "scripts": {
+	"vscode:prepublish": "npm run compile",
+	"compile": "tsc -p ./"
+    },
+    "devDependencies": {
+	"@types/node": "^14.0.0",
+	"@types/vscode": "^1.60.0",
+	"typescript": "^4.3.5",
+	"vscode": "^1.1.34"
+    },
+    "dependencies": {
+	"protobufjs": "^6.11.2"
+    }
+}
