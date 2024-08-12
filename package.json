@@ -3,6 +3,7 @@
     "displayName": "RazorEnhanced Extension",
     "version": "0.0.1",
     "description": "A VSCodium extension for RazorEnhanced",
+    "publisher": "razorenhanced",
     "repository": {
 	"type": "git",
 	"url": "https://github.com/RazorEnhanced/RazorEnhanced-extension.git"

@@ -1,20 +1,21 @@
 # Makefile for RazorEnhanced-extension
 
 # Variables
+PUBLISHER := razorenhanced
 EXTENSION_NAME := razorenhanced-extension
 VERSION := 0.0.1
 VSIX_FILE := $(EXTENSION_NAME)-$(VERSION).vsix
 
 # Default target
-all: install package
+all: npm-install package
 
 # Install dependencies
-install:
+npm-install:
 	@echo "Installing dependencies..."
 	npm install
 
 # Build the extension
-build: install
+build: npm-install
 	@echo "Building the extension..."
 	npm run compile
 
@@ -30,14 +31,14 @@ clean:
 	rm -f $(VSIX_FILE)
 
 # Install the extension in VS Code/VSCodium
-install-extension: package
+install: package
 	@echo "Installing the extension..."
 	code --install-extension $(VSIX_FILE)
 
 # Uninstall the extension
-uninstall-extension:
+uninstall:
 	@echo "Uninstalling the extension..."
-	code --uninstall-extension $(EXTENSION_NAME)
+	code --uninstall-extension $(PUBLISHER).$(EXTENSION_NAME)
 
 # Open the project in VSCodium
 open:
@@ -46,5 +47,5 @@ open:
 protobuf:
 	protoc -I ./proto --python_out=./test/ open_file.proto
 
-test: protobuf install-extension
+test: protobuf 
 	python3 test/test.py
