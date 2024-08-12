@@ -28,7 +28,11 @@
 	    {
 		"command": "razorenhanced.startReceiver",
 		"title": "Start RazorEnhanced Protobuf Receiver"
-	    }
+	    },
+            {
+		"command": "razorenhanced.stopReceiver",
+		"title": "Stop RazorEnhanced Protobuf Receiver"
+            }
 	]
     },
     "scripts": {
