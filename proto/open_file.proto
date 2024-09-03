@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-message OpenFileCommand {
-  string file_path = 1;
-}

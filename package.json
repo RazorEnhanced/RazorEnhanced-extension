@@ -1,50 +1,84 @@
 {
-    "name": "razorenhanced-extension",
-    "displayName": "RazorEnhanced Extension",
-    "version": "0.0.1",
-    "description": "A VSCodium extension for RazorEnhanced",
-    "publisher": "razorenhanced",
+    "name": "razorenhanced",
+    "displayName": "RazorEnhanced",
+    "description": "RazorEnhanced VS Code Extension",
     "repository": {
 	"type": "git",
 	"url": "https://github.com/RazorEnhanced/RazorEnhanced-extension.git"
     },
-    "author": "RazorEnhanced Team",
-    "license": "GPL-3",  
-    "keywords": ["razorenhanced", "vscodium", "extension"],
-    "categories": ["Other"],
     "bugs": {
 	"url": "https://github.com/RazorEnhanced/RazorEnhanced-extension/issues"
     },
     "homepage": "https://github.com/RazorEnhanced/RazorEnhanced-extension#readme",
+    "author": "RazorEnhanced Team",
+    "license": "GPL-3",  	
+    "keywords": ["ultima", "razorenhanced", "vscodium", "extension"],
+    "version": "0.0.1",
     "engines": {
-	"vscode": "^1.60.0"
+        "vscode": "^1.60.0"
     },
+    "categories": [
+        "Other"
+    ],
     "activationEvents": [
-	"onCommand:razorenhanced.startReceiver"
+        "onCommand:razorEnhanced.record",
+        "onCommand:razorEnhanced.stopRecording",
+        "onCommand:razorEnhanced.play"
     ],
     "main": "./out/extension.js",
     "contributes": {
-	"commands": [
-	    {
-		"command": "razorenhanced.startReceiver",
-		"title": "Start RazorEnhanced Protobuf Receiver"
-	    },
+        "commands": [
             {
-		"command": "razorenhanced.stopReceiver",
-		"title": "Stop RazorEnhanced Protobuf Receiver"
+                "command": "razorEnhanced.record",
+                "title": "Record",
+                "when": "!razorEnhanced.isRecording"
+            },
+            {
+                "command": "razorEnhanced.stopRecording",
+                "title": "Stop Recording",
+                "when": "razorEnhanced.isRecording"
+            },
+            {
+                "command": "razorEnhanced.play",
+                "title": "Play"
             }
-	]
+        ],
+        "menus": {
+            "editor/title": [
+                {
+                    "command": "razorEnhanced.record",
+                    "group": "navigation",
+                    "when": "!razorEnhanced.isRecording"
+                },
+                {
+                    "command": "razorEnhanced.stopRecording",
+                    "group": "navigation",
+                    "when": "razorEnhanced.isRecording"
+                },
+                {
+                    "command": "razorEnhanced.play",
+                    "group": "navigation"
+                }
+            ]
+        }
     },
     "scripts": {
-	"vscode:prepublish": "npm run compile",
-	"compile": "tsc -p ./"
+        "pretest": "npm run lint",
+        "lint": "eslint src",
+        "test": "node ./test/runTest.js"
     },
     "devDependencies": {
-	"@types/node": "^14.0.0",
-	"@types/vscode": "^1.60.0",
-	"typescript": "^4.3.5"
+        "@types/vscode": "^1.60.0",
+        "@types/glob": "^7.1.3",
+        "@types/mocha": "^8.2.2",
+        "@types/node": "14.x",
+        "eslint": "^7.27.0",
+        "glob": "^7.1.7",
+        "mocha": "^8.4.0",
+        "vscode-test": "^1.5.2"
     },
     "dependencies": {
-	"protobufjs": "^6.11.2"
+        "@grpc/grpc-js": "^1.3.2",
+        "@grpc/proto-loader": "^0.6.2"
     }
 }

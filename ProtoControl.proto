@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option csharp_namespace = "RazorEnhanced";
+
+package protocontrol;
+
+enum ProtoLanguage {
+    UNKNOWN = 0;  // Default value
+    PYTHON = 1;
+    CSHARP = 2;
+    UOSTEAM = 3;
+}
+
+service ProtoControl {
+  rpc Record (RecordRequest) returns (stream RecordResponse);
+  rpc Play (PlayRequest) returns (stream PlayResponse);
+}
+
+message RecordRequest {
+  ProtoLanguage language = 1;
+}
+
+message RecordResponse {
+  string data = 1;
+}
+
+message PlayRequest {
+  ProtoLanguage language = 1;
+  repeated string commands = 2;
+}
+
+message PlayResponse {
+  string result = 1;
+  bool is_finished = 2;
+}
+
