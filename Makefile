@@ -2,7 +2,7 @@
 
 # Variables
 PUBLISHER := razorenhanced
-EXTENSION_NAME := razorenhanced-extension
+EXTENSION_NAME := razorenhanced
 VERSION := 0.0.1
 VSIX_FILE := $(EXTENSION_NAME)-$(VERSION).vsix
 
@@ -13,14 +13,10 @@ all: npm-install package
 npm-install:
 	@echo "Installing dependencies..."
 	npm install
-
-# Build the extension
-build: npm-install
-	@echo "Building the extension..."
-	npm run compile
+	npm install @grpc/grpc-js @grpc/proto-loader
 
 # Package the extension into a .vsix file
-package: build
+package: 
 	@echo "Packaging the extension into a .vsix file..."
 	vsce package 
 

@@ -19,8 +19,9 @@ let client;
 let recordStream;
 
 function activate(context) {
+    console.log("Beginning activation")
     client = new protoDescriptor.protocontrol.ProtoControl(SERVER_ADDRESS, grpc.credentials.createInsecure());
-
+    console.log("client created")
     let recordCommand = vscode.commands.registerCommand('razorEnhanced.record', () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -80,7 +81,7 @@ function activate(context) {
             outputChannel.appendLine('Stream closed.');
         });
     });
-
+    console.log("Registering functions")
     context.subscriptions.push(recordCommand, stopRecordingCommand, playCommand);
 }
 

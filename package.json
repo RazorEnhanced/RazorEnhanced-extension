@@ -30,7 +30,7 @@
         "onCommand:razorEnhanced.stopRecording",
         "onCommand:razorEnhanced.play"
     ],
-    "main": "./out/extension.js",
+    "main": "./extension.js",
     "contributes": {
         "commands": [
             {
@@ -83,7 +83,7 @@
         "vscode-test": "^1.5.2"
     },
     "dependencies": {
-        "@grpc/grpc-js": "^1.3.2",
-        "@grpc/proto-loader": "^0.6.2"
+        "@grpc/grpc-js": "^1.11.1",
+        "@grpc/proto-loader": "^0.6.13"
     }
 }
