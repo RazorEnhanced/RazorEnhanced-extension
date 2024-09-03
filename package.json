@@ -49,23 +49,38 @@
             }
         ],
         "menus": {
-            "editor/title": [
+            "editor/context": [
                 {
                     "command": "razorEnhanced.record",
                     "group": "navigation",
-                    "when": "!razorEnhanced.isRecording"
+                    "when": "editorLangId == python && editorTextFocus && !razorEnhanced.isRecording",
+		    "title": "RazorEnhanced: Record"		    
                 },
                 {
                     "command": "razorEnhanced.stopRecording",
                     "group": "navigation",
-                    "when": "razorEnhanced.isRecording"
+                    "when": "editorLangId == python && razorEnhanced.isRecording",
+		    "title": "RazorEnhanced: StopRecord"
                 },
                 {
                     "command": "razorEnhanced.play",
-                    "group": "navigation"
+                    "group": "navigation",
+		    "when": "editorLangId == python && editorTextFocus",
+		    "title": "RazorEnhanced: Play"
                 }
             ]
-        }
+        },
+        "configuration": {
+            "type": "object",
+            "title": "RazorEnhanced Configuration",
+            "properties": {
+                "razorEnhanced.serverPort": {
+                    "type": "number",
+                    "default": 15454,
+                    "description": "The port number used for the gRPC server connection."
+                }
+            }
+	}
     },
     "scripts": {
         "pretest": "npm run lint",
