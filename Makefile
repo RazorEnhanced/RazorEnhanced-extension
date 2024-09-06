@@ -3,7 +3,7 @@
 # Variables
 PUBLISHER := razorenhanced
 EXTENSION_NAME := razorenhanced
-VERSION := 0.0.1
+VERSION := 0.0.2
 VSIX_FILE := $(EXTENSION_NAME)-$(VERSION).vsix
 
 # Default target
@@ -13,7 +13,7 @@ all: npm-install package
 npm-install:
 	@echo "Installing dependencies..."
 	npm install
-	npm install @grpc/grpc-js @grpc/proto-loader
+	npm install ws 
 
 # Package the extension into a .vsix file
 package: 
@@ -41,7 +41,7 @@ open:
 	@echo "Opening the project in VSCodium
 
 protobuf:
-	protoc -I ./proto --python_out=./test/ open_file.proto
+	protoc -I ./proto --python_out=./test/ ProtoControl.proto
 
 test: protobuf 
 	python3 test/test.py
