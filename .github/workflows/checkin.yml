@@ -28,8 +28,24 @@ jobs:
     - name: Package VSIX
       run: npx vsce package
       
-    - name: Upload VSIX as Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: extension
-        path: "*.vsix"
+      # Upload VSIX as a GitHub Release asset
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub automatically provides this
+        with:
+          tag_name: v1.0.0 # You can use dynamic versioning if needed
+          release_name: Release v1.0.0
+          draft: false
+          prerelease: false
+
+      # Upload VSIX to the release
+      - name: Upload VSIX to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: "./*.vsix"
+          asset_name: "your-extension.vsix"
+          asset_content_type: application/octet-stream
+          
