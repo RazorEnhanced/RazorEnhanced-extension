@@ -15,6 +15,7 @@
     "keywords": [
         "ultima",
         "razorenhanced",
+        "code",
         "vscodium",
         "extension"
     ],
@@ -28,7 +29,8 @@
     "activationEvents": [
         "onCommand:razorEnhanced.record",
         "onCommand:razorEnhanced.stopRecording",
-        "onCommand:razorEnhanced.play"
+        "onCommand:razorEnhanced.play",
+        "onCommand:razorEnhanced.stopPlaying"
     ],
     "main": "./extension.js",
     "contributes": {
@@ -45,8 +47,14 @@
             },
             {
                 "command": "razorEnhanced.play",
-                "title": "Play"
-            }
+                "title": "Play",
+                "when": "!razorEnhanced.isPlaying"                
+            },
+            {
+                "command": "razorEnhanced.stopPlaying",
+                "title": "Stop Play",
+                "when": "razorEnhanced.isPlaying"
+            }            
         ],
         "menus": {
             "editor/context": [
@@ -65,9 +73,15 @@
                 {
                     "command": "razorEnhanced.play",
                     "group": "navigation",
-                    "when": "editorLangId == python && editorTextFocus",
+                    "when": "editorLangId == python && editorTextFocus && !razorEnhanced.isPlaying",
                     "title": "RazorEnhanced: Play"
-                }
+                },
+                {
+                    "command": "razorEnhanced.stopPlaying",
+                    "group": "navigation",
+                    "when": "editorLangId == python && editorTextFocus && razorEnhanced.isPlaying",
+                    "title": "RazorEnhanced: StopPlay"
+                }                
             ]
         },
         "configuration": {
@@ -92,7 +106,7 @@
         "@types/mocha": "^8.2.2",
         "@types/node": "14.x",
         "@types/vscode": "^1.60.0",
-        "eslint": "^7.27.0",
+        "eslint": "^7.32.0",
         "glob": "^7.1.7",
         "mocha": "^10.7.3",
         "vscode-test": "^1.5.2"
@@ -100,6 +114,7 @@
     "dependencies": {
         "@grpc/proto-loader": "^0.6.13",
         "@types/ws": "^8.5.0",
+        "protobufjs": "^7.4.0",
         "ws": "^8.18.0"
     }
 }

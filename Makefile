@@ -13,7 +13,7 @@ all: npm-install package
 npm-install:
 	@echo "Installing dependencies..."
 	npm install
-	npm install ws 
+	npm install ws protobufjs
 
 # Package the extension into a .vsix file
 package: 

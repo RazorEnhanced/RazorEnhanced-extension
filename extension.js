@@ -1,212 +1,356 @@
 const vscode = require('vscode');
 const WebSocket = require('ws');
+const protobuf = require('protobufjs');
 
 const PROTO_PATH = __dirname + '/ProtoControl.proto';
-
-let client;
-let ws = null;
+let ProtoControl; // stores the loaded .proto definitions
+let isRecording = false;
+let isPlaying = false;
 
 // Enum values from ProtoMessageType in your .proto file
 const ProtoMessageType = {
-  PlayResponseType: 1,
-  PlayRequestType: 2,
-  StopPlayRequestType: 3,
-  StopPlayResponseType: 4,
-  RecordResponseType: 10,
-  RecordRequestType: 11,
-  StopRecordRequestType: 12,
-  StopRecordResponseType: 13
+    PlayResponseType: 1,
+    PlayRequestType: 2,
+    StopPlayRequestType: 3,
+    StopPlayResponseType: 4,
+    RecordResponseType: 10,
+    RecordRequestType: 11,
+    StopRecordRequestType: 12,
+    StopRecordResponseType: 13
 };
 
-// Function to connect to the WebSocket and return the instance
-function connectWebSocket(wsUrl, onOpen, onMessage, onClose, onError) {
-    console.log(`connect wsurl: ${wsUrl}`)    
-    const ws = new WebSocket(wsUrl);
+let outputChannel;
+
+function getOutputChannel() {
+    if (!outputChannel) {
+        // Create the output channel only once
+        outputChannel = vscode.window.createOutputChannel("RazorEnhanced Results");
+    }
+    return outputChannel;
+}
+
+function connectWebSocket(url) {
+    return new Promise((resolve, reject) => {
+        const ws = new WebSocket(url);
+
+        ws.onopen = () => {
+            console.log("WebSocket connected");
+            resolve(ws);
+        };
+
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+            reject(error);
+        };
+
+        ws.onclose = () => {
+            console.log("WebSocket closed");
+        };
+    });
+}
+
+async function disconnectWebSocket(ws) {
+    return new Promise((resolve, _) => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.close();
+            ws.onclose = () => {
+                console.log("WebSocket disconnected");
+                resolve();
+            };
+        } else {
+            resolve(); // Already closed
+        }
+    });
+}
+
+// Simple hash function to generate a 32-bit integer from a string
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+}
+
+function getSessionId(document) {
+    // Use the full path of the file as the unique identifier
+    return simpleHash(document.uri.fsPath);
+}
+
+function serializeMessage(messageType, messageObject) {
+    if (!ProtoControl) {
+        throw new Error("ProtoControl is not loaded");
+    }
     
-    ws.onopen = () => {
-	vscode.window.showInformationMessage('WebSocket connection established.');
-	if (onOpen) onOpen(ws);
-    };
-    
-    ws.onmessage = (event) => {
-	const response = JSON.parse(event.data);
-	if (onMessage) onMessage(response);
-    };
-    
-    ws.onclose = () => {
-	vscode.window.showInformationMessage('WebSocket connection closed.');
-	if (onClose) onClose();
-    };
-    
-    ws.onerror = (error) => {
-	vscode.window.showErrorMessage(`WebSocket error: ${error.message}`);
-	if (onError) onError(error);
-    };
-    
-    return ws;
+    const MessageType = ProtoControl.lookupType(messageType);
+    const message = MessageType.create(messageObject);
+    return MessageType.encode(message).finish();
 }
 
 function activate(context) {
     console.log("Beginning activation")
     
-    // Function to send a message over WebSocket
-    function sendWebSocketMessage(message) {
-	if (ws && ws.readyState === WebSocket.OPEN) {
-	    ws.send(JSON.stringify(message));
-	} else {
-	    vscode.window.showErrorMessage('WebSocket connection is not open.');
-	}
-    }
-
-    let playCommand = vscode.commands.registerCommand('razorEnhanced.play', () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('No active editor!');
+    // Load the ProtoControl.proto file
+    protobuf.load(PROTO_PATH, (err, root) => {
+        if (err) {
+            console.error("Error loading proto file:", err);
             return;
         }
-
-        const document = editor.document;
-        const text = document.getText();
-        const commands = text.split('\n');
-
-        const language = document.languageId === 'python' ? 1 : 3; // 1 for PYTHON, 3 for UOSTEAM
-        const playRequest = {
-	    type: 2, //ProtoMessageType.PlayRequestType,
-	    language: language,
-	    commands: text.split('\n')
-	};
-	// Retrieve the port number from the settings
-	const config = vscode.workspace.getConfiguration('razorEnhanced');
-	const port = config.get('serverPort', 15454); // Default to 15454 if not set	
-	const wsUrl = `ws://localhost:${port}/proto`; // Dynamically constructed server address	
-	console.log(`wsurl: ${wsUrl}`)
-
-	const ws = connectWebSocket(
-	    wsUrl,
-	    (ws) => {
-		ws.send(JSON.stringify(playRequest));
-	    },
-	    (response) => {
-		if (response.type === ProtoMessageType.PlayResponseType) {
-		    const buildResultWindow = vscode.window.createOutputChannel('Play Results');
-		    buildResultWindow.show();
-		    buildResultWindow.appendLine(response.result);
-		    
-		    if (!response.more) {
-			ws.close();
-		    }
-		}
-	    },
-	    () => {
-		// Optional: Cleanup or additional actions on close
-	    },
-	    (error) => {
-		// Optional: Handle errors specifically
-	    }
-	);	
+        ProtoControl = root.lookup('protocontrol'); // Load the root of your proto package
+        console.log("ProtoControl definitions loaded");
     });
-	
-    let recordCommand = vscode.commands.registerCommand('razorEnhanced.record', () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('No active editor!');
-            return;
-        }
-	try {
-            const language = editor.document.languageId === 'python' ? 1 : 3; // 1 for PYTHON, 3 for UOSTEAM
-
-	    // Start Recording
-	    recording = true;
-	    vscode.commands.executeCommand('setContext', 'razor-enhanced.record', 'Stop Recording');
-
-	    const recordRequest = {
-		type: ProtoMessageType.RecordRequestType,  // Use the numeric value for RecordRequestType
-		language: language
-	    };
-
-	    // Retrieve the port number from the settings
-	    const config = vscode.workspace.getConfiguration('razorEnhanced');
-	    const port = config.get('serverPort', 15454); // Default to 15454 if not set	
-	    const wsUrl = `ws://localhost:${port}/proto`; // Dynamically constructed server address	
-	    console.log(`wsurl: ${wsUrl}`)
-	    const ws = connectWebSocket(
-		wsUrl,
-		(ws) => {
-		    ws.send(JSON.stringify(recordRequest));
-		},
-		(response) => {
-		    if (response.type === ProtoMessageType.RecordResponseType) {
-			editor.edit(editBuilder => {
-			    editBuilder.insert(new vscode.Position(editor.document.lineCount, 0), response.data + '\n');
-			});
-			
-			if (!response.more) {
-			    ws.close();
-			    recording = false;
-			    vscode.commands.executeCommand('setContext', 'razor-enhanced.record', 'Record');
-			}
-		    }
-		},
-		() => {
-		    // Optional: Cleanup or additional actions on close
-		},
-		(error) => {
-		    // Optional: Handle errors specifically
-		}
-	    );
-	} catch (error) {
-            console.error("Error in record command:", error);
-	}	
-    });
-
-    let stopRecordingCommand = vscode.commands.registerCommand('razorEnhanced.stopRecording', () => {
-	// Stop Recording
-	recording = false;
-	vscode.commands.executeCommand('setContext', 'razor-enhanced.record', 'Record');
-	
-	const stopRecordRequest = {
-            type: ProtoMessageType.StopRecordRequestType  // Use the numeric value for StopRecordRequestType
-	};
-	
-	// Retrieve the port number from the settings
-	const config = vscode.workspace.getConfiguration('razorEnhanced');
-	const port = config.get('serverPort', 15454); // Default to 15454 if not set	
-	const wsUrl = `ws://localhost:${port}/proto`; // Dynamically constructed server address	
-	
-	const ws = connectWebSocket(
-	    wsUrl,
-            (ws) => {
-		ws.send(JSON.stringify(stopRecordRequest));
-            },
-            (response) => {
-		if (response.type === ProtoMessageType.StopRecordResponseType) {
-		    vscode.window.showInformationMessage('Recording stopped successfully');
-		    ws.close();
-		}
-            },
-            () => {
-		// Optional: Cleanup or additional actions on close
-            },
-            (error) => {
-		// Optional: Handle errors specifically
-            }
-	);							       
-    });
-
-
-    // Listen for changes in Python or .uos files
-    vscode.workspace.onDidChangeTextDocument((event) => {
-        if (event.document.languageId === 'python' || event.document.fileName.endsWith('.uos')) {
-            // Your logic here for when a Python or .uos file is edited
-            console.log(`Edited document: ${event.document.fileName}`);
-        }
-    });
-
     
-    console.log("Registering functions")
-    context.subscriptions.push(recordCommand)
-    context.subscriptions.push(stopRecordingCommand)
-    context.subscriptions.push(playCommand);
+    context.subscriptions.push(
+        vscode.commands.registerCommand('razorEnhanced.play', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor!');
+                return;
+            }
+            if (!ProtoControl) {
+                console.error("ProtoControl is not loaded");
+                return;
+            }
+
+            const document = editor.document;
+            const text = document.getText();
+            const language = document.languageId === 'python' ? 1 : 3; // 1 for PYTHON, 3 for UOSTEAM
+            const sessionid = getSessionId(document);        
+
+            // Start Recording
+            isPlaying = true;
+            vscode.commands.executeCommand('setContext', 'razorEnhanced.isPlaying', isPlaying);
+
+            const playRequest = {
+                type: ProtoMessageType.PlayRequestType,
+                sessionid: sessionid, 
+                language: language,
+                commands: text.split('\n')
+            };
+            
+            // Retrieve the port number from the settings
+            const config = vscode.workspace.getConfiguration('razorEnhanced');
+            const port = config.get('serverPort', 15454); // Default to 15454 if not set        
+            const wsUrl = `ws://localhost:${port}/proto`; // Dynamically constructed server address
+            
+            // Create an OutputChannel instance
+            
+            const outputChannel = getOutputChannel();
+            outputChannel.show();
+            try {
+                const ws = await connectWebSocket(wsUrl);
+                const requestBuffer = serializeMessage("protocontrol.PlayRequest", playRequest);
+                ws.send(requestBuffer);
+
+                ws.onmessage = (event) => {
+                    const responseBuffer = new Uint8Array(event.data);
+                    const PlayResponse = ProtoControl.lookupType('protocontrol.PlayResponse');
+                    const playResponse = PlayResponse.decode(responseBuffer);
+
+                    if (playResponse.type === ProtoMessageType.PlayResponseType) {
+                        if (playResponse.more) {
+                            outputChannel.appendLine(playResponse.result);
+                        } else {
+                            isPlaying = false;
+                            vscode.commands.executeCommand('setContext', 'razorEnhanced.isPlaying', isPlaying);
+                            // Disconnect WebSocket when done
+                            disconnectWebSocket(ws);
+                        }
+                    }
+                };
+                
+                // Disconnect WebSocket when done
+                ws.onclose = () => {
+                    console.log("WebSocket connection closed");
+                };
+
+            } catch (error) {
+                console.error("Error in play command:", error);
+            }
+        })
+    );
+    
+    context.subscriptions.push(
+        vscode.commands.registerCommand('razorEnhanced.stopPlaying', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor!');
+                return;
+            }
+            if (!ProtoControl) {
+                console.error("ProtoControl is not loaded");
+                return;
+            }
+            // Stop Playing
+            isPlaying = false;
+            vscode.commands.executeCommand('setContext', 'razorEnhanced.isPlaying', isPlaying);
+            
+            const document = editor.document;
+            const sessionid = getSessionId(document);        
+
+            const stopPlayRequest = {
+                type: ProtoMessageType.StopPlayRequestType,
+                sessionid: sessionid
+            };
+            try {       
+                // Retrieve the port number from the settings
+                const config = vscode.workspace.getConfiguration('razorEnhanced');
+                const port = config.get('serverPort', 15454); // Default to 15454 if not set    
+                const wsUrl = `ws://localhost:${port}/proto`; // Dynamically constructed server address 
+                
+                const ws = await connectWebSocket(wsUrl);
+
+                // Serialize and send RecordRequest
+                const requestBuffer = serializeMessage("protocontrol.StopPlayRequest", stopPlayRequest);
+                ws.send(requestBuffer);
+                
+                ws.onmessage = (event) => {
+                    const responseBuffer = new Uint8Array(event.data);
+                    const RecordResponse = ProtoControl.lookupType('protocontrol.StopPlayResponse');
+                    const response = RecordResponse.decode(responseBuffer);
+
+                    if (response.type === ProtoMessageType.StopPlayResponseType) {
+                        const outputChannel = getOutputChannel();
+                        outputChannel.show();
+                        outputChannel.appendLine('Play stopped successfully');
+                        isPlaying = false;
+                        vscode.commands.executeCommand('setContext', 'razorEnhanced.isPlaying', isPlaying);
+                        disconnectWebSocket(ws);                        
+                    }
+                };
+            } catch (error) {
+                console.error("Error in stopPlay command:", error);
+            }
+        })      
+    );
+    
+    context.subscriptions.push(
+        vscode.commands.registerCommand('razorEnhanced.record', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor!');
+                return;
+            }
+            if (!ProtoControl) {
+                console.error("ProtoControl is not loaded");
+                return;
+            }
+
+            const document = editor.document;
+            const language = document.languageId === 'python' ? 1 : 3; // 1 for PYTHON, 3 for UOSTEAM
+            const sessionid = getSessionId(document);        
+            
+            // Start Recording
+            isRecording = true;
+            vscode.commands.executeCommand('setContext', 'razorEnhanced.isRecording', isRecording);
+
+            const recordRequest = {
+                type: ProtoMessageType.RecordRequestType,  // Use the numeric value for RecordRequestType
+                sessionid: sessionid,
+                language: language
+            };
+
+            try {
+                const outputChannel = getOutputChannel();
+                outputChannel.show();
+
+                // Retrieve the port number from the settings
+                const config = vscode.workspace.getConfiguration('razorEnhanced');
+                const port = config.get('serverPort', 15454); // Default to 15454 if not set    
+                const wsUrl = `ws://localhost:${port}/proto`; // Dynamically constructed server address 
+
+                const ws = await connectWebSocket(wsUrl);
+
+                // Serialize and send RecordRequest
+                const requestBuffer = serializeMessage('protocontrol.RecordRequest', recordRequest);
+                ws.send(requestBuffer);
+
+                ws.onmessage = (event) => {
+                    const responseBuffer = new Uint8Array(event.data);
+                    const RecordResponse = ProtoControl.lookupType('protocontrol.RecordResponse');
+                    const recordResponse = RecordResponse.decode(responseBuffer);
+
+                    // Create an OutputChannel instance
+                    outputChannel.appendLine(`Type: ${recordResponse.type} More: ${recordResponse.more} Data: ${recordResponse.data}`);
+                    if (recordResponse.type === ProtoMessageType.RecordResponseType) {
+                        if (recordResponse.more) {
+                            editor.edit(editBuilder => {
+                                editBuilder.insert(new vscode.Position(editor.document.lineCount, 0), recordResponse.data + '\n');
+                            });
+                        } else {
+                            isRecording = false;
+                            vscode.commands.executeCommand('setContext', 'razorEnhanced.isRecording', isRecording);
+                            disconnectWebSocket(ws);
+                        }
+                    }
+                };
+
+                // Disconnect WebSocket when done
+                ws.onclose = () => {
+                    console.log("WebSocket connection closed");
+                };
+                
+            } catch (error) {
+                console.error("Error in record command:", error);
+            }
+        })
+    );
+    
+    context.subscriptions.push(
+        vscode.commands.registerCommand('razorEnhanced.stopRecording', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor!');
+                return;
+            }
+            if (!ProtoControl) {
+                console.error("ProtoControl is not loaded");
+                return;
+            }
+            // Stop Recording
+            isRecording = false;
+            vscode.commands.executeCommand('setContext', 'razorEnhanced.isRecording', isRecording);
+            
+            const document = editor.document;
+            const sessionid = getSessionId(document);        
+
+            const stopRecordRequest = {
+                type: ProtoMessageType.StopRecordRequestType,
+                sessionid: sessionid
+            };
+            try {       
+                // Retrieve the port number from the settings
+                const config = vscode.workspace.getConfiguration('razorEnhanced');
+                const port = config.get('serverPort', 15454); // Default to 15454 if not set    
+                const wsUrl = `ws://localhost:${port}/proto`; // Dynamically constructed server address 
+                
+                const ws = await connectWebSocket(wsUrl);
+
+                // Serialize and send RecordRequest
+                const requestBuffer = serializeMessage("protocontrol.StopRecordRequest", stopRecordRequest);
+                ws.send(requestBuffer);
+                
+                ws.onmessage = (event) => {
+                    const responseBuffer = new Uint8Array(event.data);
+                    const RecordResponse = ProtoControl.lookupType('protocontrol.StopRecordResponse');
+                    const response = RecordResponse.decode(responseBuffer);
+
+                    if (response.type === ProtoMessageType.StopRecordResponseType) {
+                        const outputChannel = getOutputChannel();
+                        outputChannel.show();
+                        outputChannel.appendLine('Recording stopped successfully');
+                        isRecording = false;
+                        vscode.commands.executeCommand('setContext', 'razorEnhanced.isRecording', isRecording);
+                        disconnectWebSocket(ws);                        
+                    }
+                };
+            } catch (error) {
+                console.error("Error in stopRecord command:", error);
+            }
+        })      
+    );
 }
 
 function deactivate() {
