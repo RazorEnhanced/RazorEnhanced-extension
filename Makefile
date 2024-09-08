@@ -15,8 +15,11 @@ npm-install:
 	npm install
 	npm install ws protobufjs
 
+lint:
+	eslint ./extension.js
+
 # Package the extension into a .vsix file
-package: 
+package: lint 
 	@echo "Packaging the extension into a .vsix file..."
 	vsce package 
 

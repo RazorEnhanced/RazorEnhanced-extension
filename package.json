@@ -48,13 +48,13 @@
             {
                 "command": "razorEnhanced.play",
                 "title": "Play",
-                "when": "!razorEnhanced.isPlaying"                
+                "when": "!razorEnhanced.isPlaying"
             },
             {
                 "command": "razorEnhanced.stopPlaying",
                 "title": "Stop Play",
                 "when": "razorEnhanced.isPlaying"
-            }            
+            }
         ],
         "menus": {
             "editor/context": [
@@ -81,7 +81,7 @@
                     "group": "navigation",
                     "when": "editorLangId == python && editorTextFocus && razorEnhanced.isPlaying",
                     "title": "RazorEnhanced: StopPlay"
-                }                
+                }
             ]
         },
         "configuration": {
