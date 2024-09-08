@@ -12,14 +12,13 @@ all: npm-install package
 # Install dependencies
 npm-install:
 	@echo "Installing dependencies..."
-	npm install
-	npm install ws protobufjs
+	npm install ws protobufjs vscode
 
 lint:
 	eslint ./extension.js
 
 # Package the extension into a .vsix file
-package: lint 
+package: npm-install  lint  
 	@echo "Packaging the extension into a .vsix file..."
 	vsce package 
 
