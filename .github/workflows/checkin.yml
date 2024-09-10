@@ -65,7 +65,7 @@ jobs:
         run: make tag-version
 
       - name: Package Extension
-        run: vsce package ${{ steps.build-type.outputs.version }}
+        run: vsce package 
 
       - name: Upload VSIX as artifact
         uses: actions/upload-artifact@v3
