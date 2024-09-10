@@ -69,6 +69,7 @@ jobs:
         run: |
           git status --porcelain | tee /tmp/git-status.txt
           if [ -s /tmp/git-status.txt ]; then
+	    git diff package-lock.json
             echo "Working directory is not clean. Exiting..."
             exit 1
           fi
