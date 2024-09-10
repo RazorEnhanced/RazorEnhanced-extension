@@ -64,6 +64,14 @@ jobs:
         if: steps.build-type.outputs.type == 'development'
         run: make tag-version
 
+      - name: Ensure clean working directory
+        run: |
+          git status --porcelain | tee /tmp/git-status.txt
+          if [ -s /tmp/git-status.txt ]; then
+            echo "Working directory is not clean. Exiting..."
+            exit 1
+          fi
+	  
       - name: Package Extension
         run: vsce package ${{ steps.build-type.outputs.version }}
 
