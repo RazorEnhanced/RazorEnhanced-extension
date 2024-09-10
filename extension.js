@@ -90,7 +90,7 @@ function serializeMessage(messageType, messageObject) {
 }
 
 function activate(context) {
-    console.log("Beginning activation")
+    console.log("Beginning activation");
     
     // Load the ProtoControl.proto file
     protobuf.load(PROTO_PATH, (err, root) => {
@@ -359,4 +359,4 @@ function deactivate() {
 module.exports = {
     activate,
     deactivate
-}
+};

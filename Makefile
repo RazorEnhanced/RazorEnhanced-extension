@@ -23,8 +23,12 @@ npm-install:
 	@echo "Installing dependencies..."
 	npm install ws protobufjs vscode
 
-lint:
-	eslint ./extension.js
+npm-eslint:
+	@echo "Installing eslint for dev only"
+	npx install-peerdeps eslint --y
+
+lint: npm-eslint
+	npx eslint ./extension.js
 
 # Package the extension into a .vsix file
 package: npm-install  lint  

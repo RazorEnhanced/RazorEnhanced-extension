@@ -104,10 +104,12 @@
         "@types/node": "^22.5.4",
         "@types/vscode": "^1.60.0",
         "eslint": "^9.10.0",
+        "install-peerdeps": "^3.0.3",
         "vscode": "^1.1.37"
     },
     "dependencies": {
         "@types/ws": "^8.5.0",
+        "jiti": "^1.21.6",
         "protobufjs": "^7.4.0",
         "tough-cookie": "^4.1.4",
         "ws": "^8.18.0"
