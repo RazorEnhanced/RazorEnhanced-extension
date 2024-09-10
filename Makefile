@@ -74,7 +74,7 @@ increment-version:
 
 tag-version:
 	@new_version=$$(cat .version); \
-	git add package.json; \
-	git commit -m "Bump version to $$new_version"; \
-	git tag v$$new_version; \
-	git push && git push --tags
+	#git add package.json; \
+	#git commit -m "Bump version to $$new_version"; \
+	#git tag v$$new_version; \
+	#git push && git push --tags
