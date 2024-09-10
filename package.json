@@ -19,7 +19,7 @@
         "vscodium",
         "extension"
     ],
-    "version": "0.0.2-dev.55-dev.57-dev.61-dev.62-dev.65",
+    "version": "0.0.2",
     "engines": {
         "vscode": "^1.60.0"
     },
