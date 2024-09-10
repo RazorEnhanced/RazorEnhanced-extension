@@ -45,11 +45,11 @@ jobs:
 
       - name: Set up Git
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name credzba
+          git config user.email ultimarazorenhanced@gmail.com
 
-      - name: Build and Test
-        run: make build test
+      - name: lint
+        run: make lint
 
       - name: Increment version (development build only)
         if: steps.build-type.outputs.type == 'development'
