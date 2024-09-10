@@ -1,87 +1,73 @@
-name: Build VSIX
+name: VSCodium Extension CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  release:
+    types: [created]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Use Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Updated to a more recent LTS version
 
-    - name: Install dependencies
-      run: make npm-install
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Update version with Git hash
-      run: bash update-version.sh
+      - name: Install vsce
+        run: npm install -g vsce
 
-    - name: Install vsce
-      run: npm install -g vsce
+      - name: Set up Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
 
-    - name: Package Extension
-      run: vsce package
+      - name: Build and Test
+        run: make build test
 
-    - name: List files in the working directory
-      run: ls -al
+      - name: Determine build type
+        id: build-type
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "type=release" >> $GITHUB_OUTPUT
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "type=development" >> $GITHUB_OUTPUT
+            echo "version=$(make get-version)-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
+          fi
 
-    - name: Upload VSIX artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: vsix
-        path: razorenhanced-*.vsix
+      - name: Increment version (development build only)
+        if: steps.build-type.outputs.type == 'development'
+        run: make increment-version
 
-    - name: Get short commit hash
-      id: get_short_hash
-      run: |
-        SHORT_HASH=$(git rev-parse --short HEAD)
-        echo "SHORT_HASH=$SHORT_HASH" >> $GITHUB_ENV
-        echo "Short commit hash: $SHORT_HASH"
+      - name: Update version for development build
+        if: steps.build-type.outputs.type == 'development'
+        run: |
+          sed -i 's/"version": ".*"/"version": "${{ steps.build-type.outputs.version }}"/' package.json
 
-    - name: Check commit SHA
-      run: echo "Commit SHA - ${{ env.SHORT_HASH }}"
-      
-    - name: Set VSIX file path
-      id: set_path
-      run: |
-        # Find the VSIX file
-        VSIX_FILE=$(ls razorenhanced-*.vsix)
-        echo "VSIX file found: $VSIX_FILE"
-        echo "VSIX_FILE=$VSIX_FILE" >> $GITHUB_ENV
+      - name: Tag version (development build only)
+        if: steps.build-type.outputs.type == 'development'
+        run: make tag-version
 
-    - name: Upload VSIX artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: vsix
-        path: "${{ env.VSIX_FILE }}"
+      - name: Package Extension
+        run: vsce package ${{ steps.build-type.outputs.version }}
 
-    - name: Create release
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: v${{ env.SHORT_HASH }}
-        release_name: Release v${{ env.SHORT_HASH }}
-        body: Automated release
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}	
+      - name: Upload VSIX as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: extension-${{ steps.build-type.outputs.type }}
+          path: "*.vsix"
 
-    - name: Upload VSIX to Release
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.VSIX_FILE }}
-        asset_name: razorenhanced-v${{ env.SHORT_HASH }}.vsix
-        asset_content_type: application/zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}	
-
+      - name: Publish to Marketplace (release only)
+        if: steps.build-type.outputs.type == 'release'
+        run: vsce publish -p ${{ secrets.VSCE_PAT }}
