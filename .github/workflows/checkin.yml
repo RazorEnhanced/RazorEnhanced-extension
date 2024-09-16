@@ -68,7 +68,7 @@ jobs:
         run: vsce package 
 
       - name: Upload VSIX as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: extension-${{ steps.build-type.outputs.type }}
           path: "*.vsix"
