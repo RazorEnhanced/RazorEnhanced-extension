@@ -20,11 +20,12 @@
         "vscodium",
         "extension"
     ],
-    "version": "0.0.3",
+    "version": "0.0.4",
     "engines": {
         "vscode": "^1.60.0"
     },
     "categories": [
+        "Programming Languages",
         "Other"
     ],
     "activationEvents": [
@@ -35,6 +36,18 @@
     ],
     "main": "./extension.js",
     "contributes": {
+        "languages": [
+            {
+                "id": "uos",
+                "aliases": [
+                    "UOSteam",
+                    "uos"
+                ],
+                "extensions": [
+                    ".uos"
+                ]
+            }
+        ],
         "commands": [
             {
                 "command": "razorEnhanced.record",
@@ -62,25 +75,25 @@
                 {
                     "command": "razorEnhanced.record",
                     "group": "navigation",
-                    "when": "editorLangId == python && editorTextFocus && !razorEnhanced.isRecording",
+                    "when": "editorLangId =~ /(python|csharp|uos)/ && editorTextFocus && !razorEnhanced.isRecording",
                     "title": "RazorEnhanced: Record"
                 },
                 {
                     "command": "razorEnhanced.stopRecording",
                     "group": "navigation",
-                    "when": "editorLangId == python && razorEnhanced.isRecording",
+                    "when": "editorLangId =~ /(python|csharp|uos)/ && razorEnhanced.isRecording",
                     "title": "RazorEnhanced: StopRecord"
                 },
                 {
                     "command": "razorEnhanced.play",
                     "group": "navigation",
-                    "when": "editorLangId == python && editorTextFocus && !razorEnhanced.isPlaying",
+                    "when": "editorLangId =~ /(python|csharp|uos)/ && editorTextFocus && !razorEnhanced.isPlaying",
                     "title": "RazorEnhanced: Play"
                 },
                 {
                     "command": "razorEnhanced.stopPlaying",
                     "group": "navigation",
-                    "when": "editorLangId == python && editorTextFocus && razorEnhanced.isPlaying",
+                    "when": "editorLangId =~ /(python|csharp|uos)/ && editorTextFocus && razorEnhanced.isPlaying",
                     "title": "RazorEnhanced: StopPlay"
                 }
             ]

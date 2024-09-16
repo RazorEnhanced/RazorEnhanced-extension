@@ -12,7 +12,7 @@ endif
 SHELL := /usr/bin/bash
 PUBLISHER := razorenhanced
 EXTENSION_NAME := razorenhanced
-VERSION := 0.0.2
+VERSION := $(shell sed -n 's/.*"version": "\(.*\)",/\1/p' package.json)
 VSIX_FILE := $(EXTENSION_NAME)-$(VERSION).vsix
 
 # Default target
@@ -25,7 +25,7 @@ npm-install:
 
 npm-eslint:
 	@echo "Installing eslint for dev only"
-	npx install-peerdeps eslint --y
+	npm install eslint --silent --dev
 
 lint: npm-eslint
 	npx eslint ./extension.js

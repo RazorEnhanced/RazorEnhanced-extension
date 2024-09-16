@@ -116,7 +116,9 @@ function activate(context) {
 
             const document = editor.document;
             const text = document.getText();
-            const language = document.languageId === 'python' ? 1 : 3; // 1 for PYTHON, 3 for UOSTEAM
+            const language = document.languageId === 'python' ? 1 :
+                 document.languageId === 'csharp' ? 2 :
+                 document.languageId === 'uos' ? 3 : 0; // Default to 0 if none match
             const sessionid = getSessionId(document);        
 
             // Start Recording
@@ -239,7 +241,9 @@ function activate(context) {
             }
 
             const document = editor.document;
-            const language = document.languageId === 'python' ? 1 : 3; // 1 for PYTHON, 3 for UOSTEAM
+            const language = document.languageId === 'python' ? 1 :
+                 document.languageId === 'uos' ? 3 : 0; // Default to 0 if none match
+            
             const sessionid = getSessionId(document);        
             
             // Start Recording
