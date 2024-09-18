@@ -1,0 +1,22 @@
+{
+    "indentationRules": {
+        "increaseIndentPattern": "^\\s*(while|for|if)\\b",
+        "decreaseIndentPattern": "^\\s*(endwhile|endfor|endif)\\b"
+    },
+    "brackets": [
+        //["while", "endwhile"],
+        //["for", "endfor"],
+        //["if", "endif"]
+    ],
+    "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)",
+    "onEnterRules": [
+        {
+            "beforeText": "^\\s*if",
+            "action": { "indent": "indent" }
+        },
+        {
+            "beforeText": "^\\s*else",
+            "action": { "removeText": 4 }
+        }
+    ]
+}

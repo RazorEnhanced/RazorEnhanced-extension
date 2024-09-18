@@ -2,6 +2,7 @@
 
 # Variables
 SHELL := $(or $(SHELL),/usr/bin/bash)
+Code = /c/Program\ Files/Microsoft\ VS\ Code/Code.exe
 
 # Check if the shell is bash or zsh, otherwise default to bash
 SHELL_NAME := $(shell basename $(SHELL))
@@ -9,7 +10,7 @@ ifeq ($(filter $(SHELL_NAME),bash zsh),)
     SHELL := /usr/bin/bash
 endif
 
-SHELL := /usr/bin/bash
+SHELL := /usr/bin/zsh
 PUBLISHER := razorenhanced
 EXTENSION_NAME := razorenhanced
 VERSION := $(shell sed -n 's/.*"version": "\(.*\)",/\1/p' package.json)
@@ -44,12 +45,12 @@ clean:
 # Install the extension in VS Code/VSCodium
 install: package
 	@echo "Installing the extension..."
-	code --install-extension $(VSIX_FILE)
+	$(Code) --install-extension $(VSIX_FILE)
 
 # Uninstall the extension
 uninstall:
 	@echo "Uninstalling the extension..."
-	code --uninstall-extension $(PUBLISHER).$(EXTENSION_NAME)
+	$(Code) --uninstall-extension $(PUBLISHER).$(EXTENSION_NAME)
 
 # Open the project in VSCodium
 open:

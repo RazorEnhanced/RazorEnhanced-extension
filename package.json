@@ -29,6 +29,9 @@
         "Other"
     ],
     "activationEvents": [
+        "onLanguage:uos",
+        "onLanguage:python",
+        "onLanguage:csharp",
         "onCommand:razorEnhanced.record",
         "onCommand:razorEnhanced.stopRecording",
         "onCommand:razorEnhanced.play",
@@ -45,7 +48,15 @@
                 ],
                 "extensions": [
                     ".uos"
-                ]
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "uos",
+                "scopeName": "source.uos",
+                "path": "./uos.tmLanguage.json"
             }
         ],
         "commands": [
@@ -105,7 +116,7 @@
                 "razorEnhanced.serverPort": {
                     "type": "number",
                     "default": 15454,
-                    "description": "The port number used for the gRPC server connection."
+                    "description": "The port number used for the server connection."
                 }
             }
         }

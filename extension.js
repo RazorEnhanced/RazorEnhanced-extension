@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const WebSocket = require('ws');
 const protobuf = require('protobufjs');
+//const UOSIndentationRule = require('./uosIndentationRule');
 
 const PROTO_PATH = __dirname + '/ProtoControl.proto';
 let ProtoControl; // stores the loaded .proto definitions
@@ -101,7 +102,14 @@ function activate(context) {
         ProtoControl = root.lookup('protocontrol'); // Load the root of your proto package
         console.log("ProtoControl definitions loaded");
     });
-    
+
+    // Register UOS indentation rule
+    //console.log("Registering uos indention");
+    //const uosIndentationRule = new UOSIndentationRule();
+    //vscode.languages.setLanguageConfiguration('uos', {
+    //    onEnterRules: uosIndentationRule.onEnterRules
+    //});
+
     context.subscriptions.push(
         vscode.commands.registerCommand('razorEnhanced.play', async () => {
             const editor = vscode.window.activeTextEditor;
