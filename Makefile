@@ -4,13 +4,6 @@
 SHELL := $(or $(SHELL),/usr/bin/bash)
 Code = /c/Program\ Files/Microsoft\ VS\ Code/Code.exe
 
-# Check if the shell is bash or zsh, otherwise default to bash
-SHELL_NAME := $(shell basename $(SHELL))
-ifeq ($(filter $(SHELL_NAME),bash zsh),)
-    SHELL := /usr/bin/bash
-endif
-
-SHELL := /usr/bin/zsh
 PUBLISHER := razorenhanced
 EXTENSION_NAME := razorenhanced
 VERSION := $(shell sed -n 's/.*"version": "\(.*\)",/\1/p' package.json)
