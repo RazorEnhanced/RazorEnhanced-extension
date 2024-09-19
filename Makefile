@@ -2,7 +2,11 @@
 
 # Variables
 SHELL := /usr/bin/bash
-Code = /c/Program\ Files/Microsoft\ VS\ Code/Code.exe
+ifeq ($(OS),Windows_NT)
+    Code = /c/Program\ Files/Microsoft\ VS\ Code/Code.exe
+else
+    Code := /usr/bin/code
+endif
 
 PUBLISHER := razorenhanced
 EXTENSION_NAME := razorenhanced
