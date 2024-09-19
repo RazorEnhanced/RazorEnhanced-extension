@@ -1,22 +1,46 @@
 {
-    "indentationRules": {
-        "increaseIndentPattern": "^\\s*(while|for|if)\\b",
-        "decreaseIndentPattern": "^\\s*(endwhile|endfor|endif)\\b"
+    "comments": {
+        "lineComment": "//",
+        "blockComment": ["/*", "*/"]
     },
     "brackets": [
-        //["while", "endwhile"],
-        //["for", "endfor"],
-        //["if", "endif"]
+        ["{", "}"],
+        ["[", "]"],
+        ["(", ")"]
     ],
-    "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)",
+    "autoClosingPairs": [
+        { "open": "{", "close": "}" },
+        { "open": "[", "close": "]" },
+        { "open": "(", "close": ")" },
+        { "open": "\"", "close": "\"" },
+        { "open": "'", "close": "'" }
+    ],
+    "surroundingPairs": [
+        { "open": "{", "close": "}" },
+        { "open": "[", "close": "]" },
+        { "open": "(",", "close": ")" },
+        { "open": "\"", "close": "\"" },
+        { "open": "'", "close": "'" }
+    ],
+    "indentationRules": {
+        "increaseIndentPattern": "^\\s*(while|for|if|else)\\b",
+        "decreaseIndentPattern": "^\\s*(endwhile|endfor|else|endif)\\b"
+    },
     "onEnterRules": [
         {
-            "beforeText": "^\\s*if",
-            "action": { "indent": "indent" }
+            "beforeText": "^\\s*if.*$",
+            "afterText": "^.*$",
+            "action": { "indentAction": "Indent" }
         },
         {
-            "beforeText": "^\\s*else",
-            "action": { "removeText": 4 }
+            "beforeText": "^\\s*else.*$",
+            "afterText": "^.*$",
+            "action": { "indentAction": "IndentOutdent" }
+        },
+        {
+            "beforeText": "^\\s*endif.*$",
+            "afterText": "^.*$",
+            "action": { "indentAction": "Outdent" }
         }
     ]
 }

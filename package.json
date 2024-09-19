@@ -20,13 +20,14 @@
         "vscodium",
         "extension"
     ],
-    "version": "0.0.4",
+    "version": "0.1.0",
     "engines": {
         "vscode": "^1.60.0"
     },
     "categories": [
         "Programming Languages",
-        "Other"
+        "Ultima Online",
+        "Themes"
     ],
     "activationEvents": [
         "onLanguage:uos",
@@ -39,6 +40,13 @@
     ],
     "main": "./extension.js",
     "contributes": {
+        "themes": [
+            {
+                "label": "UOSteam Theme",
+                "uiTheme": "vs-dark",
+                "path": "./themes/uos-theme.json"
+            }
+        ],
         "languages": [
             {
                 "id": "uos",
@@ -56,7 +64,7 @@
             {
                 "language": "uos",
                 "scopeName": "source.uos",
-                "path": "./uos.tmLanguage.json"
+                "path": "./syntaxes/uos.tmLanguage.json"
             }
         ],
         "commands": [
