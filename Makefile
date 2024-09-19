@@ -1,7 +1,7 @@
 # Makefile for RazorEnhanced-extension
 
 # Variables
-SHELL := $(or $(SHELL),/usr/bin/bash)
+SHELL := /usr/bin/bash
 Code = /c/Program\ Files/Microsoft\ VS\ Code/Code.exe
 
 PUBLISHER := razorenhanced
