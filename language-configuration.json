@@ -18,7 +18,7 @@
     "surroundingPairs": [
         { "open": "{", "close": "}" },
         { "open": "[", "close": "]" },
-        { "open": "(",", "close": ")" },
+        { "open": "(", "close": ")" },
         { "open": "\"", "close": "\"" },
         { "open": "'", "close": "'" }
     ],
@@ -30,17 +30,17 @@
         {
             "beforeText": "^\\s*if.*$",
             "afterText": "^.*$",
-            "action": { "indentAction": "Indent" }
+            "action": { "indent": "indent" }
         },
         {
             "beforeText": "^\\s*else.*$",
             "afterText": "^.*$",
-            "action": { "indentAction": "IndentOutdent" }
+            "action": { "indent": "indentOutdent" }
         },
         {
             "beforeText": "^\\s*endif.*$",
             "afterText": "^.*$",
-            "action": { "indentAction": "Outdent" }
+            "action": { "indent": "outdent" }
         }
     ]
 }
