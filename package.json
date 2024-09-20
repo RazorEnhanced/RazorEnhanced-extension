@@ -67,6 +67,12 @@
                 "path": "./syntaxes/uos.tmLanguage.json"
             }
         ],
+        "snippets": [
+            {
+                "language": "uos",
+                "path": "./snippets/uos.json"
+            }
+        ],
         "commands": [
             {
                 "command": "razorEnhanced.record",

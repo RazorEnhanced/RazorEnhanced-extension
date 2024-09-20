@@ -9,31 +9,37 @@
         {
             "scope": "keyword.control.uos",
             "settings": {
-                "foreground": "#5d5de0"
+                "foreground": "#C586C0"
             }
         },
         {
             "scope": "keyword.operator.comparison.uos",
             "settings": {
-                "foreground": "#90b6db"
+                "foreground": "#FFD700"
             }
-        },
+        },                
+        {
+            "scope": "keyword.operator.at.uos",
+            "settings": {
+                "foreground": "#CCCCCC"
+            }
+        },        
         {
             "scope": "support.function.uos",
             "settings": {
-                "foreground": "#569CD6"
+                "foreground": "#DCDCAA"
             }
         },
         {
             "scope": "support.constant.uos",
             "settings": {
-                "foreground": "#4EC9B0"
+                "foreground": "#CE9178"
             }
         },
         {
             "scope": "comment.line.uos",
             "settings": {
-                "foreground": "#ffd6ad"
+                "foreground": "#6A9955"
             }
         },
         {
