@@ -363,6 +363,45 @@ function activate(context) {
             }
         })      
     );
+
+    let disposable = vscode.languages.registerDocumentFormattingEditProvider('uos', {
+        provideDocumentFormattingEdits(document) {
+            const edits = [];
+            const text = document.getText();
+            const formattedText = formatText(text);
+            const fullRange = new vscode.Range(
+                document.positionAt(0),
+                document.positionAt(text.length)
+            );
+            edits.push(vscode.TextEdit.replace(fullRange, formattedText));
+            return edits;
+        }
+    });
+
+    context.subscriptions.push(disposable);
+}
+
+function formatText(text) {
+    const increaseIndentPattern = /^\s*(while|for|if|else)\b/;
+    const decreaseIndentPattern = /^\s*(endwhile|endfor|else|endif)\b/;
+    const lines = text.split('\n');
+    let indentLevel = 0;
+    const indentSize = 4; // Number of spaces for each indent level
+
+    return lines.map(line => {
+        if (decreaseIndentPattern.test(line)) {
+            indentLevel = Math.max(indentLevel - 1, 0);
+        }
+
+        const trimmedLine = line.trim();
+        const indentedLine = ' '.repeat(indentLevel * indentSize) + trimmedLine;
+
+        if (increaseIndentPattern.test(line)) {
+            indentLevel++;
+        }
+
+        return indentedLine;
+    }).join('\n');
 }
 
 function deactivate() {
