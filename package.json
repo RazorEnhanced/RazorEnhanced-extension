@@ -20,7 +20,7 @@
         "vscodium",
         "extension"
     ],
-    "version": "0.1.1",
+    "version": "0.1.2",
     "engines": {
         "vscode": "^1.60.0"
     },
@@ -142,7 +142,7 @@
     "devDependencies": {
         "@types/node": "^22.5.4",
         "@types/vscode": "^1.60.0",
-        "eslint": "^9.10.0",
+        "eslint": "^9.11.1",
         "install-peerdeps": "^3.0.3",
         "vscode": "^1.1.37"
     },
